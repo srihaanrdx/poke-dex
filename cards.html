@@ -1,0 +1,89 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <title>Pokémon Card Database</title>
+  <link href="https://fonts.googleapis.com/css2?family=Press+Start+2P&display=swap" rel="stylesheet">
+  <link rel="stylesheet" href="style.css" />
+  <style>
+    .search-container {
+      margin-top: 1rem;
+    }
+
+    .search-container input {
+      width: 200px;
+    }
+
+    .cards {
+      margin-top: 2rem;
+      display: grid;
+      grid-template-columns: repeat(auto-fit, minmax(180px, 1fr));
+      gap: 1rem;
+    }
+
+    .card {
+      border: 2px solid #333;
+      padding: 1rem;
+      background: #fff;
+      color: #000;
+      text-align: center;
+    }
+
+    .card img {
+      width: 100px;
+      image-rendering: pixelated;
+    }
+
+    .card h3 {
+      font-size: 10px;
+      margin-top: 0.5rem;
+    }
+
+    .card p {
+      font-size: 8px;
+      margin-top: 0.2rem;
+    }
+  </style>
+</head>
+<body>
+  <div class="container">
+    <h1>Pokémon Card Search</h1>
+    <div class="search-container">
+      <input type="text" id="cardSearch" placeholder="Enter card or Pokémon name" />
+      <button onclick="searchCards()">Search</button>
+    </div>
+    <div class="cards" id="cardResults"></div>
+    <p class="credit">Made by Srihaan Chowdhury</p>
+  </div>
+
+  <script>
+    async function searchCards() {
+      const query = document.getElementById("cardSearch").value.toLowerCase();
+      const cardResults = document.getElementById("cardResults");
+      cardResults.innerHTML = "Loading...";
+      
+      try {
+        const res = await fetch(`https://api.pokemontcg.io/v2/cards?q=name:${query}&pageSize=8`);
+        const data = await res.json();
+
+        if (data.data.length === 0) {
+          cardResults.innerHTML = "<p>No cards found.</p>";
+          return;
+        }
+
+        cardResults.innerHTML = data.data.map(card => `
+          <div class="card">
+            <img src="${card.images.small}" alt="${card.name}" />
+            <h3>${card.name}</h3>
+            <p>Set: ${card.set.name}</p>
+            <p>Value: $${card.cardmarket?.prices?.averageSellPrice?.toFixed(2) || 'N/A'}</p>
+          </div>
+        `).join("");
+      } catch (err) {
+        cardResults.innerHTML = "<p>Error loading cards.</p>";
+        console.error(err);
+      }
+    }
+  </script>
+</body>
+</html>

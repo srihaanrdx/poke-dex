@@ -1,0 +1,100 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0"/>
+  <title>Pokémon Guesser</title>
+  <link href="https://fonts.googleapis.com/css2?family=Press+Start+2P&display=swap" rel="stylesheet">
+  <link rel="stylesheet" href="style.css" />
+</head>
+<body>
+  <div class="pixel-screen">
+    <div class="container">
+      <!-- Title with typing effect -->
+      <h1 id="title"></h1>
+
+      <!-- App Content -->
+      <input type="number" id="pokeNumber" placeholder="Enter Pokédex Number" />
+      <button id="guessButton" onclick="getPokemon()">Guess</button>
+      <button id="cardButton" onclick="goToCardPage()">💳 View Cards</button>
+      <div id="result"></div>
+    </div>
+  </div>
+
+  <!-- Button Click Sound -->
+  <audio id="button-click-sound" preload="auto">
+    <source src="https://www.soundjay.com/button/beep-07.wav" type="audio/wav">
+    Your browser does not support the audio element.
+  </audio>
+
+  <!-- JS Script -->
+  <script>
+    // Title typing effect
+    const titleText = "Pokémon Guesser";
+    let i = 0;
+
+    function typeTitle() {
+      if (i < titleText.length) {
+        document.getElementById("title").innerHTML += titleText.charAt(i);
+        i++;
+        setTimeout(typeTitle, 100); // Speed of typing
+      }
+    }
+    window.onload = typeTitle;
+
+    // Play sound on button click
+    function playClickSound() {
+      const buttonClickSound = document.getElementById('button-click-sound');
+      
+      // Make sure the sound is loaded before playing it
+      buttonClickSound.load(); 
+      
+      // Attempt to play the sound
+      buttonClickSound.play().then(() => {
+        console.log("Sound played successfully");
+      }).catch(err => {
+        console.log("Error playing sound:", err);
+      });
+    }
+
+    // Add click sound and animation to buttons
+    const buttons = document.querySelectorAll('button');
+    buttons.forEach(button => {
+      button.addEventListener('click', function() {
+        console.log("Button clicked, playing sound...");
+        playClickSound(); // Play sound on click
+        
+        // Pixel explosion animation on button click
+        const explosion = document.createElement('div');
+        explosion.classList.add('pixel-explosion');
+        button.appendChild(explosion);
+        setTimeout(() => {
+          explosion.remove();
+        }, 300); // Explosion duration
+      });
+    });
+
+    // Fetch Pokémon and display result
+    function getPokemon() {
+      const number = document.getElementById('pokeNumber').value;
+      const resultDiv = document.getElementById('result');
+      if (!number) return resultDiv.innerHTML = 'Enter a number!';
+      fetch(`https://pokeapi.co/api/v2/pokemon/${number}`)
+        .then(res => res.json())
+        .then(data => {
+          resultDiv.innerHTML = `
+            <h2>#${data.id} ${data.name.toUpperCase()}</h2>
+            <img src="${data.sprites.front_default}" />
+          `;
+        }).catch(() => {
+          resultDiv.innerHTML = 'No Pokémon found!';
+        });
+    }
+
+    // Go to card page
+    function goToCardPage() {
+      window.location.href = 'cards.html';
+    }
+  </script>
+</body>
+</html>
